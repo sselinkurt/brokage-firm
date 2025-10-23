@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: brokerage-api
+
+  datasource:
+    url: jdbc:h2:mem:brokeragedb
+    driver-class-name: org.h2.Driver
+    username: root
+    password: pass
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      mode: always
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+
+initial-try-balance: 10000.00
