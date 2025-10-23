@@ -1,7 +1,7 @@
 package com.application.brokagefirm.application.service;
 
-import com.application.brokagefirm.application.port.in.CreateOrderCommand;
-import com.application.brokagefirm.application.port.in.CreateOrderUseCase;
+import com.application.brokagefirm.application.port.in.command.CreateOrderCommand;
+import com.application.brokagefirm.application.port.in.usecase.CreateOrderUseCase;
 import com.application.brokagefirm.application.port.out.AssetPersistencePort;
 import com.application.brokagefirm.application.port.out.OrderPersistencePort;
 import com.application.brokagefirm.domain.enums.OrderSide;
@@ -60,7 +60,7 @@ public class CreateOrderService implements CreateOrderUseCase {
 
     private Asset getAssetOrThrow(Long customerId, String assetName) {
         return assetPersistencePort.findByCustomerIdAndAssetName(customerId, assetName)
-                .orElseThrow(() -> new IllegalStateException(assetName + " varlığı bulunamadı."));
+                .orElseThrow(() -> new IllegalStateException(assetName + " is not found."));
     }
 
     private void ensureAssetExists(Long customerId, String assetName) {

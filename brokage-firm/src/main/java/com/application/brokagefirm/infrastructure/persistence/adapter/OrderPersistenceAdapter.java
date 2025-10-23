@@ -8,6 +8,11 @@ import com.application.brokagefirm.infrastructure.persistence.repository.OrderJp
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Repository
 @RequiredArgsConstructor
 public class OrderPersistenceAdapter implements OrderPersistencePort {
@@ -19,5 +24,26 @@ public class OrderPersistenceAdapter implements OrderPersistencePort {
         OrderJpaEntity entity = orderMapper.toJpaEntity(order);
         OrderJpaEntity savedEntity = orderJpaRepository.save(entity);
         return orderMapper.toDomainModel(savedEntity);
+    }
+
+    @Override
+    public Optional<Order> findById(Long orderId) {
+        return orderJpaRepository.findById(orderId)
+                .map(orderMapper::toDomainModel);
+    }
+
+    @Override
+    public List<Order> findByCustomerIdAndDateRange(Long customerId, LocalDateTime startDate, LocalDateTime endDate) {
+        List<OrderJpaEntity> entities;
+
+        if (startDate != null && endDate != null) {
+            entities = orderJpaRepository.findByCustomerIdAndCreateDateBetween(customerId, startDate, endDate);
+        } else {
+            entities = orderJpaRepository.findByCustomerId(customerId);
+        }
+
+        return entities.stream()
+                .map(orderMapper::toDomainModel)
+                .collect(Collectors.toList());
     }
 }

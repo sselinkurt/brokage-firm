@@ -1,7 +1,7 @@
 package com.application.brokagefirm.presentation.web;
 
-import com.application.brokagefirm.application.port.in.CustomerRegisterCommand;
-import com.application.brokagefirm.application.port.in.CustomerRegisterUseCase;
+import com.application.brokagefirm.application.port.in.command.CustomerRegisterCommand;
+import com.application.brokagefirm.application.port.in.usecase.CustomerRegisterUseCase;
 import com.application.brokagefirm.domain.model.Customer;
 import com.application.brokagefirm.presentation.dto.CustomerRegisterRequest;
 import jakarta.validation.Valid;

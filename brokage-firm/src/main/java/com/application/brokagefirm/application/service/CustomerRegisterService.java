@@ -1,7 +1,7 @@
 package com.application.brokagefirm.application.service;
 
-import com.application.brokagefirm.application.port.in.CustomerRegisterCommand;
-import com.application.brokagefirm.application.port.in.CustomerRegisterUseCase;
+import com.application.brokagefirm.application.port.in.command.CustomerRegisterCommand;
+import com.application.brokagefirm.application.port.in.usecase.CustomerRegisterUseCase;
 import com.application.brokagefirm.application.port.out.AssetPersistencePort;
 import com.application.brokagefirm.application.port.out.CustomerPersistencePort;
 import com.application.brokagefirm.domain.enums.Role;

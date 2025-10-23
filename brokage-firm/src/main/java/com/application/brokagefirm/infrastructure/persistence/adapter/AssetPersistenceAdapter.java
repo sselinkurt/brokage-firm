@@ -8,7 +8,9 @@ import com.application.brokagefirm.infrastructure.persistence.repository.AssetJp
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -27,5 +29,12 @@ public class AssetPersistenceAdapter implements AssetPersistencePort {
         AssetJpaEntity entity = assetMapper.toJpaEntity(asset);
         AssetJpaEntity savedEntity = assetJpaRepository.save(entity);
         return assetMapper.toDomainModel(savedEntity);
+    }
+
+    @Override
+    public List<Asset> findByCustomerId(Long customerId) {
+        return assetJpaRepository.findByCustomerId(customerId).stream()
+                .map(assetMapper::toDomainModel)
+                .collect(Collectors.toList());
     }
 }

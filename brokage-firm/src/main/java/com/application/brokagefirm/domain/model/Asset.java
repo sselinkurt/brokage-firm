@@ -15,4 +15,13 @@ public record Asset(
         }
         return new Asset(id, customerId, assetName, size, usableSize.subtract(amount));
     }
+
+    public Asset increaseUsableSize(BigDecimal amount) {
+        return new Asset(id, customerId, assetName, size, usableSize.add(amount));
+    }
+
+    public Asset increaseSizeAndUsableSize(BigDecimal amount) {
+        return new Asset(id, customerId, assetName, size.add(amount), usableSize.add(amount));
+    }
+
 }
