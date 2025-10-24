@@ -1,4 +1,4 @@
-package com.application.brokagefirm.presentation.dto;
+package com.application.brokagefirm.presentation.dto.request;
 
 import com.application.brokagefirm.domain.enums.OrderSide;
 import jakarta.validation.constraints.DecimalMin;

@@ -8,6 +8,8 @@ import com.application.brokagefirm.infrastructure.persistence.repository.Custome
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 @RequiredArgsConstructor
 public class CustomerPersistenceAdapter implements CustomerPersistencePort {
@@ -20,6 +22,17 @@ public class CustomerPersistenceAdapter implements CustomerPersistencePort {
         CustomerJpaEntity entity = customerMapper.toJpaEntity(customer);
         CustomerJpaEntity savedEntity = customerJpaRepository.save(entity);
         return customerMapper.toDomainModel(savedEntity);
+    }
+
+    @Override
+    public Optional<Customer> findByUsername(String username) {
+        Optional<CustomerJpaEntity> entityOptional = customerJpaRepository.findByUsername(username);
+        return entityOptional.map(customerMapper::toDomainModel);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return customerJpaRepository.existsByUsername(username);
     }
 
 }

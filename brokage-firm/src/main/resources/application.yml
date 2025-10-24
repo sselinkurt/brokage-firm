@@ -28,3 +28,7 @@ server:
   port: 8080
 
 initial-try-balance: 10000.00
+
+jwt:
+  secret: eYEmZrURmGTOUXh4f3XbgUIpmP6lZ2puJuexBcEckDg=
+  expiration: 600000

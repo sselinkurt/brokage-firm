@@ -4,20 +4,24 @@ import com.application.brokagefirm.application.port.in.command.MatchOrderCommand
 import com.application.brokagefirm.application.port.in.usecase.MatchOrderUseCase;
 import com.application.brokagefirm.application.port.out.AssetPersistencePort;
 import com.application.brokagefirm.application.port.out.OrderPersistencePort;
+import com.application.brokagefirm.domain.PriceCalculator;
 import com.application.brokagefirm.domain.enums.OrderSide;
 import com.application.brokagefirm.domain.enums.OrderStatus;
+import com.application.brokagefirm.domain.exception.InvalidOperationException;
+import com.application.brokagefirm.domain.exception.ResourceNotFoundException;
 import com.application.brokagefirm.domain.model.Asset;
 import com.application.brokagefirm.domain.model.Order;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class MatchOrderService implements MatchOrderUseCase {
 
     private final OrderPersistencePort orderPersistencePort;
@@ -26,14 +30,14 @@ public class MatchOrderService implements MatchOrderUseCase {
     @Override
     public Order matchOrder(MatchOrderCommand command) {
         Order order = orderPersistencePort.findById(command.orderId())
-                .orElseThrow(() -> new IllegalStateException("Order not found with id: " + command.orderId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + command.orderId()));
 
         if (order.status() != OrderStatus.PENDING) {
-            throw new IllegalStateException("Only PENDING orders can be matched. Current status: " + order.status());
+            throw new InvalidOperationException("Only PENDING orders can be matched. Current status: " + order.status());
         }
 
         if ("TRY".equals(order.assetName())) {
-            throw new IllegalStateException("Invalid asset: " + order.assetName());
+            throw new InvalidOperationException("Invalid asset: " + order.assetName());
         }
 
         updateAssets(order);
@@ -48,7 +52,12 @@ public class MatchOrderService implements MatchOrderUseCase {
                 OrderStatus.MATCHED,
                 order.createDate()
         );
-        return orderPersistencePort.save(matchedOrder);
+        Order savedOrder = orderPersistencePort.save(matchedOrder);
+
+        log.info("Order successfully matched. Order ID: {}, Customer ID: {}, Asset: {}",
+                savedOrder.id(), savedOrder.customerId(), savedOrder.assetName());
+
+        return savedOrder;
     }
 
     private void updateAssets(Order order) {
@@ -64,7 +73,7 @@ public class MatchOrderService implements MatchOrderUseCase {
         assetPersistencePort.save(stockAsset.increaseSizeAndUsableSize(order.size()));
 
         Asset tryAsset = getAssetOrThrow(order.customerId(), "TRY");
-        BigDecimal requiredAmount = order.price().multiply(order.size()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal requiredAmount = PriceCalculator.calculateTotalAmount(order.price(), order.size());
 
         BigDecimal newTrySize = tryAsset.size().subtract(requiredAmount);
 
@@ -73,7 +82,8 @@ public class MatchOrderService implements MatchOrderUseCase {
                 tryAsset.customerId(),
                 tryAsset.assetName(),
                 newTrySize,
-                tryAsset.usableSize()
+                tryAsset.usableSize(),
+                tryAsset.version()
         );
 
         assetPersistencePort.save(updatedTryAsset);
@@ -88,19 +98,21 @@ public class MatchOrderService implements MatchOrderUseCase {
                 stockAsset.customerId(),
                 stockAsset.assetName(),
                 newStockSize,
-                stockAsset.usableSize()
+                stockAsset.usableSize(),
+                stockAsset.version()
         );
         assetPersistencePort.save(updatedStockAsset);
 
         Asset tryAsset = getAssetOrThrow(order.customerId(), "TRY");
-        BigDecimal amountToAdd = order.price().multiply(order.size()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal amountToAdd = PriceCalculator.calculateTotalAmount(order.price(), order.size());
 
         Asset updatedTryAsset = new Asset(
                 tryAsset.id(),
                 tryAsset.customerId(),
                 tryAsset.assetName(),
-                tryAsset.size(),
-                tryAsset.usableSize().add(amountToAdd)
+                tryAsset.size().add(amountToAdd),
+                tryAsset.usableSize().add(amountToAdd),
+                tryAsset.version()
         );
 
         assetPersistencePort.save(updatedTryAsset);
@@ -108,6 +120,6 @@ public class MatchOrderService implements MatchOrderUseCase {
 
     private Asset getAssetOrThrow(Long customerId, String assetName) {
         return assetPersistencePort.findByCustomerIdAndAssetName(customerId, assetName)
-                .orElseThrow(() -> new IllegalStateException(assetName + " is not found for customer."));
+                .orElseThrow(() -> new ResourceNotFoundException(assetName + " is not found for customer."));
     }
 }

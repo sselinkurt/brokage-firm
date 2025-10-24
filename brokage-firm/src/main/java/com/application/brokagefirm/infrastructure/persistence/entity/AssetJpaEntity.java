@@ -26,4 +26,7 @@ public class AssetJpaEntity {
     private String assetName;
     private BigDecimal size;
     private BigDecimal usableSize;
+
+    @Version
+    private Long version;
 }

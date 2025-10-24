@@ -1,4 +1,4 @@
-package com.application.brokagefirm.presentation.dto;
+package com.application.brokagefirm.presentation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

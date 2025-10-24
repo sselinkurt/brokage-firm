@@ -19,7 +19,6 @@ public class ListOrdersQueryService implements ListOrdersQuery {
 
     @Override
     public List<Order> listOrders(ListOrdersQueryCommand query) {
-
         return orderPersistencePort.findByCustomerIdAndDateRange(
                 query.customerId(),
                 query.startDate(),

@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS asset (
     size NUMERIC(38, 2) NOT NULL,
     usable_size NUMERIC(38, 2) NOT NULL,
     UNIQUE (customer_id, asset_name),
-    CONSTRAINT fk_asset_customer FOREIGN KEY (customer_id) REFERENCES customer(id)
+    CONSTRAINT fk_asset_customer FOREIGN KEY (customer_id) REFERENCES customer(id),
+    version BIGINT NOT NULL DEFAULT 0
     );
 
 CREATE TABLE IF NOT EXISTS stock_order (
